@@ -1,0 +1,75 @@
+_base_ = '/home/xjgao/mmdetection/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco.py'
+# learning policy
+lr_config = dict(step=[28, 34])
+runner = dict(type='EpochBasedRunner', max_epochs=36)
+model = dict(
+    roi_head=dict(
+        bbox_head=dict(
+            num_classes=80),
+        mask_head=dict( 
+            num_classes=80,
+            )),
+    test_cfg=dict(
+        rcnn=dict(
+            score_thr=0.5,
+            )))
+optimizer = dict(lr=5e-4)
+lr_config = dict(warmup=None)
+
+# use caffe img_norm
+img_norm_cfg = dict(
+    mean=[103.530, 116.280, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='LoadAnnotations',
+        with_bbox=True,
+        with_mask=True,
+        poly2mask=False),
+    dict(
+        type='Resize',
+        img_scale=[(1333, 640), (1333, 672), (1333, 704), (1333, 736),
+                   (1333, 768), (1333, 800)],
+        multiscale_mode='value',
+        keep_ratio=True),
+    dict(type='MinIoURandomCrop',min_ious=(0.1, 0.3, 0.5, 0.7, 0.9), min_crop_size=0.3,  bbox_clip_border=True),
+    dict(type='Rotate', level=1, scale=1, center=None, img_fill_val=128, seg_ignore_label=255, prob=0.5, max_rotate_angle=30, random_negative_prob=0.5),
+    dict(type='PhotoMetricDistortion', brightness_delta=32, contrast_range=(0.5, 1.5), saturation_range=(0.5, 1.5), hue_delta=18),
+    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(1333, 800),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(type='Normalize', **img_norm_cfg),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img']),
+        ])
+]
+dataset_type = 'CocoDataset'
+dataset_train_A = dict(
+        type=dataset_type,
+        ann_file='/data/xwchi/annotations/instances_train2017.json',
+        img_prefix='/data/xwchi/train2017',
+        pipeline=train_pipeline,)
+dataset_val_origin = dict(
+        type=dataset_type,
+        ann_file='/data/xwchi/annotations/instances_val2017.json',
+        img_prefix='/data/xwchi/val2017',
+        pipeline=test_pipeline,)
+
+data = dict(
+    imgs_per_gpu = 8,
+    train=[dataset_train_A],
+    val=[dataset_val_origin]
+    )
