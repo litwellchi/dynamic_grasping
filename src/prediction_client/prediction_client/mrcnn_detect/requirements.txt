@@ -1,0 +1,4 @@
+# please check the cuda version before install
+torch
+mmdet
+
