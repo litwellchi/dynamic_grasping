@@ -44,4 +44,4 @@ if __name__ == '__main__':
     # Test code
     config_file = './configs/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_opaque.py'
     checkpoint_file = './epoch_2_09061103.pth'
-    SuctionPointDetector(config_file, checkpoint_file)
+    mmdetDetector(config_file, checkpoint_file)
