@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 
 
-class SuctionPointDetector(object):
+class mmdetDetector(object):
     def __init__(self, config_file, checkpoint_file):
         self.config_file = config_file
         self.checkpoint_file = checkpoint_file
@@ -16,16 +16,6 @@ class SuctionPointDetector(object):
         self.result = None
         self.img = None
         self.depth = None
-
-    def find_suction_point(self, img, depth, show_result=False):
-        """
-        Use this function to get the suction point
-        """
-        result = self.instance_detect(img)
-        # masks =
-        suction_candidate = self.get_scution_candidate(masks)
-
-        # if show_result: self.show_result(img,result)
 
     def instance_detect(self, img):
         """
@@ -39,27 +29,15 @@ class SuctionPointDetector(object):
     def set_box_bound(self, bound):
         """
         Set the RGB range of picking box
+        bound = [x_min, x_max, y_min, y_max]
         """
-        x_min, x_max, y_min, y_max = 375, 875, 175, 525
-
-    def get_scution_candidate(self, masks, method='simple_midpoint'):
-        """
-        return:pose_list:[[x,y,z,r,p,y],...]
-        """
-        return getattr(self, '__'+method)(masks)
+        x_min, x_max, y_min, y_max = [375, 875, 175, 525]
 
     def show_result(self, img, result, save_path=None):
         """
         save or show the detection result
         """
         self.model.show_result(img, result, out_file=save_path)
-
-    def __simple_midpoint(masks):
-        print("__simple_midpoint")
-        pass
-
-    def __depth2pcd():
-        pass
 
 
 if __name__ == '__main__':
