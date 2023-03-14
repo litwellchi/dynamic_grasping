@@ -1,3 +1,4 @@
+import cv2
 from detect import mmdetDetector
 
 class SuctionPointGenerator(object):
@@ -21,6 +22,12 @@ class SuctionPointGenerator(object):
     
 if __name__ == '__main__':
     # Test code
-    config_file = './configs/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_opaque.py'
-    checkpoint_file = './epoch_2_09061103.pth'
-    spg = SuctionPointGenerator(config_file, checkpoint_file)
+    config_file = '/home/xwchi/autostore_franka/dynamic_grasping/src/prediction_client/prediction_client/mrcnn_detect/configs/mask_rcnn_r50_caffe_fpn_mstrain-poly_3x_coco_opaque.py'
+    checkpoint_file = '/home/xjgao/InstanceSeg_opaque/exps_opaque/epoch_2_09061103.pth'
+    detector = mmdetDetector(config_file, checkpoint_file)
+    img = cv2.imread('/home/xwchi/autostore_franka/dynamic_grasping/src/prediction_client/prediction_client/collect_data/color_image_1.png')
+    x_min, x_max, y_min, y_max = [375, 875, 175, 525]
+    # crop_img = img[y_min:y_max, x_min:x_max]
+    crop_img = img
+    result = detector.instance_detect(crop_img)
+    detector.show_result(crop_img,result,'/home/xwchi/autostore_franka/dynamic_grasping/src/prediction_client/prediction_client/mrcnn_detect/test.jpg')
