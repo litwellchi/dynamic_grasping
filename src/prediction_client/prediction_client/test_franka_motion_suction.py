@@ -96,10 +96,19 @@ def detect_once(self,show_result = True, camera_crop_x_left=350,camera_crop_x_ri
         # get suction point by simple 
         camera_xyz_list = []
         for box in result[0][0]:
+            
+            #generate suction point by simple midpoint
             y_min,x_min,y_max,x_max,confidence=box
-            center_x = int((x_min+x_max)/2)                   
-            center_y = int((y_min+y_max)/2)
-            center_z = depth_image[center_y,center_x]
+            center_x = int((x_min+x_max)/2) + camera_crop_x_left                 
+            center_y = int((y_min+y_max)/2) + camera_crop_y_top
+            # center_z = depth_image[center_y,center_x]
+            dis = aligned_depth_frame.get_distance(center_x, center_y)
+            camera_xyz = rs.rs2_deproject_pixel_to_point(
+            depth_intrin, (center_x, center_y), dis)  # 计算相机坐标系的xyz
+            camera_xyz = np.round(np.array(camera_xyz), 3)  # 转成3位小数
+            camera_xyz = camera_xyz.tolist()
+            if camera_xyz[0] != 0.0 and camera_xyz[1] != 0.0 and camera_xyz[2] != 0.0: #remove zero list
+                camera_xyz_list.append(camera_xyz)
             if show_result:
                 cv2.circle(depth_colormap, (center_y, center_x), 10, (255,255,255), 0)        
         return camera_xyz_list
